@@ -3,6 +3,7 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import application.Main;
 import gui.util.Alerts;
@@ -33,12 +34,19 @@ public class MainViewController implements Initializable {
 		System.out.println("onMenuItemSellerAction");
 	}
 	@FXML
+			//Segundo parametro contem a funcão para inicializar o controlador DepartmentListController
+			//como uma expressão lambda. Necessário declara o 2o parametro na funcao loadview com a
+			//Interface Consumer
 	public void onMenuItemDepartmentAction() {
-		loadView2("/gui/DepartmentList.fxml");
+		loadView("/gui/DepartmentList.fxml",
+			    (DepartmentListController controller) -> {
+			      controller.setDepartmentService(new DepartmentService());
+			      controller.updateTableview();}
+			    );
 	}
 	@FXML
 	public void onMenuItemAboutAction() {
-		loadView("/gui/About.fxml");
+		loadView("/gui/About.fxml", x -> {}); //função X que leva em nada, pois a tela nao carrega nada
 	}
 	
 	
@@ -49,8 +57,9 @@ public class MainViewController implements Initializable {
 			
 	}
 	
-	//carrega a tela about
-	private synchronized void loadView(String absolutName) {
+	//carrega as telas com a Função Generica LoadView
+	//Consumer utilizado para utilizar apenas uma funcão LoadView. A torna genérica
+	private synchronized <T> void loadView(String absolutName, Consumer<T> initializingAction) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
 			VBox newVBox = loader.load();
@@ -66,38 +75,13 @@ public class MainViewController implements Initializable {
 			mainVBox.getChildren().add(mainMenu);
 			mainVBox.getChildren().addAll(newVBox.getChildren());
 			
+			//comando para ativar o segundo parameto Consumer
+			T controller = loader.getController();
+			initializingAction.accept(controller);
+			
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
 		}
 	}
 	
-	//carrega a tela about
-	private synchronized void loadView2(String absolutName) {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
-			VBox newVBox = loader.load();
-			
-			//coloca a tela about dentro da tela principal. Necessário pegar referencia 
-			//da Scene da classe Main
-			Scene mainScene = Main.getMainScene();
-			//Acessando os filhos do VBOX
-			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
-			
-			Node mainMenu = mainVBox.getChildren().get(0);
-			mainVBox.getChildren().clear();
-			mainVBox.getChildren().add(mainMenu);
-			mainVBox.getChildren().addAll(newVBox.getChildren());
-			
-			//injetando a dependencia manualmente
-			DepartmentListController controller = loader.getController(); //acessa o controller como referencia
-			controller.setDepartmentService(new DepartmentService());
-			controller.updateTableview();
-			
-		} catch (IOException e) {
-			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), AlertType.ERROR);
-		}
-
-	}
-	
-
 }
