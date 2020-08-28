@@ -54,7 +54,9 @@ public class DepartmentListController implements Initializable{
 	//Metodos
 	public void onBtnNewAction(ActionEvent event) {
 		Stage parentStage = Utils.currentStage(event);
-		createDialogForm("/gui/DepartmentForm.fxml", parentStage);
+		//formulario começa vázio e passa o obj vazio para o formulario
+		Department obj = new Department(); 
+		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
 	}
 
 	 //metodo resposável por acesser o serviço, carregar os departamentos e jogar
@@ -89,15 +91,22 @@ public class DepartmentListController implements Initializable{
 	}
 	
 	//função para carregar a janela departmentForm
-	private void createDialogForm(String absolutName, Stage parentStage) {
+	private void createDialogForm(Department obj, String absolutName, Stage parentStage) {
 		try {
 			//logica para abrir a janela de formulario
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absolutName));
 			Pane pane = loader.load();
 			
+			//injeta o obj no DepartmentListController
+			//pega o controlador da tela carregada (formulario)
+			DepartmentFormController controller = loader.getController();
+			//carrega o objeto no formulario
+			controller.setDepartment(obj);
+			controller.updateFormData();
+			
+			
 			//para colocar uma janela modal na frente de outra é necessário instanciar um novo Stage
 			//um palco na frente do outro
-			
 			Stage dialogStage = new Stage();
 			dialogStage.setTitle("Enter Department Data");
 			dialogStage.setScene(new Scene(pane));
