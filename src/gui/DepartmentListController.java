@@ -102,6 +102,8 @@ public class DepartmentListController implements Initializable{
 			DepartmentFormController controller = loader.getController();
 			//carrega o objeto no formulario
 			controller.setDepartment(obj);
+			//injeçao de dependência
+			controller.setDepartmentService(new DepartmentService());
 			controller.updateFormData();
 			
 			

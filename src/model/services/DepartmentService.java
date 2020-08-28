@@ -22,4 +22,13 @@ public class DepartmentService {
 		list.add(new Department(3, "Electronics"));
 		return list;*/	
 	}
+	
+	public void saveOrUpdate(Department obj) {
+		//null significa save, novo department se nao atualiza
+		if (obj.getId() == null) { 
+			dao.insert(obj);
+		} else {
+			dao.update(obj);
+		}
+	}
 }
