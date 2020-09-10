@@ -3,7 +3,9 @@ package gui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import db.DbException;
 import gui.listeners.DataChangeListener;
@@ -18,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Department;
+import model.exceptions.ValidationException;
 import model.services.DepartmentService;
 
 public class DepartmentFormController implements Initializable {
@@ -55,6 +58,10 @@ public class DepartmentFormController implements Initializable {
 			notifyDataChangeListeners(); //notifica a atualização da lista
 			Utils.currentStage(event).close();
 		}
+		//capiturando o validation excepiton dos campos do formulario 
+		catch (ValidationException e){
+			setErrorMessages(e.getErros());
+		}
 		catch (DbException e) {
 			Alerts.showAlert("Error Saving Object", null, e.getMessage(), AlertType.ERROR);
 		}
@@ -69,8 +76,20 @@ public class DepartmentFormController implements Initializable {
 		private Department getFormatData() {
 			Department obj = new Department();
 			
+			//instancia a validação/execeção
+			ValidationException exception = new ValidationException("Validation Error");
+			
 			obj.setId(Utils.tryParseToInt(txtId.getText()));
+			
+			//verifica se o campo nome esta vazio 
+			if (txtName.getText() == null || txtName.getText().trim().equals("")) {
+				exception.addError("name", "Field can't be empty");
+			}
 			obj.setName(txtName.getText());
+			//lança a execeção caso exista algum erro
+			if (exception.getErros().size() > 0) {
+				throw exception;
+			}
 			
 			return obj;
 		}
@@ -113,5 +132,15 @@ public class DepartmentFormController implements Initializable {
 		Constraints.setTextFieldInteger(txtId);
 		Constraints.setTextFieldMaxLength(txtName, 30);
 	}
-
+	
+	//metoso responsavel por pegar os erros na colletions de execeção e escreve-los na tela "Label"
+	private void setErrorMessages(Map<String, String> errors) {
+		Set<String> fields = errors.keySet(); //conjunto de erros
+		
+		//verifica um por um os erros do conjunto fields se tem o valor "name"
+		if (fields.contains("name")) {
+			labelErrorName.setText(errors.get("name"));
+		}
+	}
+ 
 }
