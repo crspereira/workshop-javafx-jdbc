@@ -135,7 +135,7 @@ public class DepartmentFormController implements Initializable {
 	
 	//metoso responsavel por pegar os erros na colletions de execeção e escreve-los na tela "Label"
 	private void setErrorMessages(Map<String, String> errors) {
-		Set<String> fields = errors.keySet(); //conjunto de erros
+		Set<String> fields = errors.keySet(); //conjunto de erros pelo nome dos campos
 		
 		//verifica um por um os erros do conjunto fields se tem o valor "name"
 		if (fields.contains("name")) {
